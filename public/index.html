@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0d12">
+    <meta name="description" content="Soundbox partagée, simple et instantanée">
+    <title>Soundbox</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Soundbox — accueil">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>SOUNDBOX</span>
+      </a>
+      <button class="button button-primary" id="add-profile-button" type="button">
+        <span aria-hidden="true">＋</span> Personne
+      </button>
+    </header>
+
+    <main>
+      <div class="tabs-row">
+        <nav id="profile-tabs" class="tabs" aria-label="Profils"></nav>
+        <button id="edit-profile-button" class="icon-button profile-settings" type="button" aria-label="Modifier le profil" hidden>•••</button>
+      </div>
+
+      <section id="welcome" class="empty-state" hidden>
+        <span class="empty-icon" aria-hidden="true">♫</span>
+        <p class="eyebrow">PRÊT À FAIRE DU BRUIT ?</p>
+        <h1>Créez votre premier profil</h1>
+        <p>Chaque personne dispose de son onglet et de ses propres boutons.</p>
+        <button class="button button-primary" id="welcome-profile-button" type="button">Créer un profil</button>
+      </section>
+
+      <section id="board" class="board" hidden>
+        <div class="board-heading">
+          <div>
+            <p class="eyebrow">TABLEAU DE BORD</p>
+            <h1 id="profile-title"></h1>
+          </div>
+          <button class="button button-primary" id="add-sound-button" type="button"><span aria-hidden="true">＋</span> Ajouter un son</button>
+        </div>
+        <div id="sound-grid" class="sound-grid"></div>
+        <div id="no-sounds" class="empty-sounds" hidden>
+          <div class="empty-sound-art" aria-hidden="true"><span></span></div>
+          <h2>Ce tableau attend son premier son</h2>
+          <p>Ajoutez un fichier depuis votre appareil ou importez une URL HTTPS.</p>
+          <button class="button button-secondary" id="empty-add-sound-button" type="button">Ajouter un son</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="profile-dialog">
+      <form id="profile-form" class="dialog-card">
+        <div class="dialog-header">
+          <div><p class="eyebrow">PROFIL</p><h2 id="profile-dialog-title">Nouvelle personne</h2></div>
+          <button class="dialog-close" type="button" data-close aria-label="Fermer">×</button>
+        </div>
+        <label>Nom<input id="profile-name" name="name" maxlength="80" autocomplete="off" required></label>
+        <p id="profile-error" class="form-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button id="delete-profile-button" class="button button-danger" type="button" hidden>Supprimer</button>
+          <span class="spacer"></span>
+          <button class="button button-ghost" type="button" data-close>Annuler</button>
+          <button class="button button-primary" type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="sound-dialog">
+      <form id="sound-form" class="dialog-card">
+        <div class="dialog-header">
+          <div><p class="eyebrow">BOUTON ARCADE</p><h2 id="sound-dialog-title">Ajouter un son</h2></div>
+          <button class="dialog-close" type="button" data-close aria-label="Fermer">×</button>
+        </div>
+
+        <div id="source-switch" class="segmented" role="group" aria-label="Source du son">
+          <button type="button" data-source="file" class="active">Fichier local</button>
+          <button type="button" data-source="url">URL HTTPS</button>
+        </div>
+
+        <label>Nom du bouton<input id="sound-name" name="name" maxlength="80" autocomplete="off" required placeholder="Air horn"></label>
+        <label id="file-field">Fichier audio<input id="sound-file" name="file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,.mp3,.wav,.ogg"></label>
+        <label id="url-field" hidden>URL directe<input id="sound-url" name="url" type="url" inputmode="url" placeholder="https://exemple.com/son.mp3"></label>
+
+        <fieldset class="color-fieldset">
+          <legend>Couleur</legend>
+          <div id="color-options" class="color-options"></div>
+        </fieldset>
+        <p id="sound-error" class="form-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button id="delete-sound-button" class="button button-danger" type="button" hidden>Supprimer</button>
+          <span class="spacer"></span>
+          <button class="button button-ghost" type="button" data-close>Annuler</button>
+          <button id="sound-submit-button" class="button button-primary" type="submit">Ajouter</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
