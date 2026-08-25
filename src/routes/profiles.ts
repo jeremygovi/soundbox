@@ -6,6 +6,7 @@ import { AppError } from '../errors.js';
 import { cleanName, parseId } from '../services/audio.js';
 import { soundFilePath } from '../services/sounds.js';
 import type { Profile } from '../types.js';
+import { requireAdmin } from '../auth.js';
 
 export function registerProfileRoutes(app: FastifyInstance, db: Database.Database, config: Config): void {
   app.get('/api/profiles', async () =>
@@ -13,6 +14,7 @@ export function registerProfileRoutes(app: FastifyInstance, db: Database.Databas
   );
 
   app.post<{ Body: { name?: unknown } }>('/api/profiles', async (request, reply) => {
+    requireAdmin(request);
     const name = cleanName(request.body?.name);
     const result = db.prepare(`
       INSERT INTO profiles (name, position, created_at)
@@ -25,6 +27,7 @@ export function registerProfileRoutes(app: FastifyInstance, db: Database.Databas
   app.patch<{ Params: { id: string }; Body: { name?: unknown; position?: unknown } }>(
     '/api/profiles/:id',
     async (request) => {
+      requireAdmin(request);
       const id = parseId(request.params.id);
       const current = db.prepare('SELECT * FROM profiles WHERE id = ?').get(id) as Profile | undefined;
       if (!current) throw new AppError('Profil introuvable', 404);
@@ -37,6 +40,7 @@ export function registerProfileRoutes(app: FastifyInstance, db: Database.Databas
   );
 
   app.delete<{ Params: { id: string } }>('/api/profiles/:id', async (request, reply) => {
+    requireAdmin(request);
     const id = parseId(request.params.id);
     const exists = db.prepare('SELECT id FROM profiles WHERE id = ?').get(id);
     if (!exists) throw new AppError('Profil introuvable', 404);

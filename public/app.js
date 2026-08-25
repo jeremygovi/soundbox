@@ -1,6 +1,15 @@
 const COLORS = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'];
 
 const elements = {
+  appShell: document.querySelector('#app-shell'),
+  loginDialog: document.querySelector('#login-dialog'),
+  loginForm: document.querySelector('#login-form'),
+  loginPassword: document.querySelector('#login-password'),
+  loginError: document.querySelector('#login-error'),
+  loginSubmit: document.querySelector('#login-submit'),
+  roleBadge: document.querySelector('#role-badge'),
+  addProfile: document.querySelector('#add-profile-button'),
+  logout: document.querySelector('#logout-button'),
   tabs: document.querySelector('#profile-tabs'),
   welcome: document.querySelector('#welcome'),
   board: document.querySelector('#board'),
@@ -31,6 +40,7 @@ const elements = {
 };
 
 const state = {
+  role: null,
   profiles: [],
   activeProfileId: null,
   sounds: [],
@@ -47,8 +57,35 @@ async function api(url, options = {}) {
   const response = await fetch(url, options);
   if (response.status === 204) return null;
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error || `Erreur HTTP ${response.status}`);
+  if (!response.ok) {
+    if (response.status === 401 && url !== '/api/auth/login') showLogin();
+    throw new Error(body.error || `Erreur HTTP ${response.status}`);
+  }
   return body;
+}
+
+function isAdmin() { return state.role === 'admin'; }
+
+function showLogin() {
+  state.role = null;
+  stopAudio();
+  elements.appShell.hidden = true;
+  document.querySelectorAll('dialog[open]').forEach((dialog) => {
+    if (dialog !== elements.loginDialog) dialog.close();
+  });
+  elements.loginError.textContent = '';
+  elements.loginForm.reset();
+  if (!elements.loginDialog.open) elements.loginDialog.showModal();
+  elements.loginPassword.focus();
+}
+
+function showApp(role) {
+  state.role = role;
+  elements.appShell.hidden = false;
+  elements.roleBadge.textContent = role === 'admin' ? 'Mode admin' : 'Utilisateur';
+  elements.roleBadge.classList.toggle('admin', role === 'admin');
+  elements.addProfile.hidden = role !== 'admin';
+  if (elements.loginDialog.open) elements.loginDialog.close();
 }
 
 function showToast(message) {
@@ -75,7 +112,12 @@ function renderProfiles() {
   const empty = state.profiles.length === 0;
   elements.welcome.hidden = !empty;
   elements.board.hidden = empty;
-  elements.editProfile.hidden = empty;
+  elements.editProfile.hidden = empty || !isAdmin();
+  document.querySelector('#welcome-profile-button').hidden = !isAdmin();
+  document.querySelector('#welcome-title').textContent = isAdmin() ? 'Créez votre premier profil' : 'Aucun profil disponible';
+  document.querySelector('#welcome-copy').textContent = isAdmin()
+    ? 'Chaque personne dispose de son onglet et de ses propres boutons.'
+    : 'Un administrateur doit créer un profil avant de pouvoir ajouter des sons.';
   if (!empty) elements.title.textContent = activeProfile()?.name || '';
 }
 
@@ -227,6 +269,16 @@ async function load() {
   } catch (error) { showToast(error.message); }
 }
 
+async function initialize() {
+  try {
+    const session = await api('/api/auth/session');
+    showApp(session.role);
+    await load();
+  } catch (error) {
+    if (state.role) showToast(error.message);
+  }
+}
+
 COLORS.forEach((color, index) => {
   const label = document.createElement('label');
   label.className = 'color-choice';
@@ -241,7 +293,8 @@ COLORS.forEach((color, index) => {
 });
 
 document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
-document.querySelector('#add-profile-button').addEventListener('click', () => openProfileDialog(false));
+elements.loginDialog.addEventListener('cancel', (event) => event.preventDefault());
+elements.addProfile.addEventListener('click', () => openProfileDialog(false));
 document.querySelector('#welcome-profile-button').addEventListener('click', () => openProfileDialog(false));
 elements.editProfile.addEventListener('click', () => openProfileDialog(true));
 document.querySelector('#add-sound-button').addEventListener('click', () => openSoundDialog());
@@ -249,6 +302,34 @@ document.querySelector('#empty-add-sound-button').addEventListener('click', () =
 elements.sourceSwitch.addEventListener('click', (event) => {
   const button = event.target.closest('[data-source]');
   if (button) setSource(button.dataset.source);
+});
+
+elements.loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  elements.loginError.textContent = '';
+  elements.loginSubmit.disabled = true;
+  try {
+    const session = await api('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: elements.loginPassword.value })
+    });
+    showApp(session.role);
+    await load();
+  } catch (error) {
+    elements.loginError.textContent = error.message;
+    elements.loginPassword.select();
+  } finally {
+    elements.loginSubmit.disabled = false;
+  }
+});
+
+elements.logout.addEventListener('click', async () => {
+  try { await api('/api/auth/logout', { method: 'POST' }); } catch { /* La session est déjà inutilisable. */ }
+  state.profiles = [];
+  state.sounds = [];
+  state.activeProfileId = null;
+  showLogin();
 });
 
 elements.profileForm.addEventListener('submit', async (event) => {
@@ -323,4 +404,4 @@ elements.deleteSound.addEventListener('click', async () => {
   } catch (error) { elements.soundError.textContent = error.message; }
 });
 
-load();
+initialize();

@@ -37,7 +37,8 @@ logs: ## Suivre les logs
 shell: ## Ouvrir un shell dans le conteneur
 	docker compose exec soundbox sh
 
-deploy: build up ## Construire et démarrer la dernière version
+prod: ## Builder l'app et la lancer en mode daemon
+	docker compose build --no-cache && docker compose up
 
 backup: ## Créer une archive cohérente dans backups/
 	@mkdir -p backups

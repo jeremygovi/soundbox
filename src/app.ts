@@ -5,18 +5,34 @@ import { mkdirSync } from 'node:fs';
 import type { Config } from './config.js';
 import { openDatabase } from './database/database.js';
 import { AppError } from './errors.js';
+import { registerAuth } from './auth.js';
 import { registerProfileRoutes } from './routes/profiles.js';
 import { registerSoundRoutes } from './routes/sounds.js';
 
 export async function buildApp(config: Config): Promise<FastifyInstance> {
   mkdirSync(config.soundsDir, { recursive: true });
   const db = openDatabase(config.databasePath, config.migrationsDir);
-  const app = Fastify({ logger: process.env.NODE_ENV !== 'test' });
+  const app = Fastify({ logger: process.env.NODE_ENV !== 'test', trustProxy: true });
+
+  app.addHook('onSend', async (request, reply, payload) => {
+    reply
+      .header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+      .header('Referrer-Policy', 'no-referrer')
+      .header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+      .header('X-Content-Type-Options', 'nosniff')
+      .header('X-Frame-Options', 'DENY');
+    if (request.protocol === 'https') {
+      reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+    return payload;
+  });
 
   await app.register(multipart, {
     limits: { fileSize: config.maxSoundSizeBytes, files: 1, fields: 10, parts: 11 }
   });
   await app.register(fastifyStatic, { root: config.publicDir, prefix: '/' });
+
+  registerAuth(app, config);
 
   app.get('/health', async () => {
     db.prepare('SELECT 1').get();

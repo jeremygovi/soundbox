@@ -10,47 +10,65 @@
     <script src="/app.js" defer></script>
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="/" aria-label="Soundbox — accueil">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span>SOUNDBOX</span>
-      </a>
-      <button class="button button-primary" id="add-profile-button" type="button">
-        <span aria-hidden="true">＋</span> Personne
-      </button>
-    </header>
+    <div id="app-shell" hidden>
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Soundbox — accueil">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>SOUNDBOX</span>
+        </a>
+        <div class="topbar-actions">
+          <span id="role-badge" class="role-badge"></span>
+          <button class="button button-primary" id="add-profile-button" type="button" hidden>
+            <span aria-hidden="true">＋</span> <span class="button-label">Personne</span>
+          </button>
+          <button class="button button-ghost logout-button" id="logout-button" type="button">Déconnexion</button>
+        </div>
+      </header>
 
-    <main>
-      <div class="tabs-row">
-        <nav id="profile-tabs" class="tabs" aria-label="Profils"></nav>
-        <button id="edit-profile-button" class="icon-button profile-settings" type="button" aria-label="Modifier le profil" hidden>•••</button>
-      </div>
+      <main>
+        <div class="tabs-row">
+          <nav id="profile-tabs" class="tabs" aria-label="Profils"></nav>
+          <button id="edit-profile-button" class="icon-button profile-settings" type="button" aria-label="Modifier le profil" hidden>•••</button>
+        </div>
 
-      <section id="welcome" class="empty-state" hidden>
-        <span class="empty-icon" aria-hidden="true">♫</span>
-        <p class="eyebrow">PRÊT À FAIRE DU BRUIT ?</p>
-        <h1>Créez votre premier profil</h1>
-        <p>Chaque personne dispose de son onglet et de ses propres boutons.</p>
-        <button class="button button-primary" id="welcome-profile-button" type="button">Créer un profil</button>
-      </section>
+        <section id="welcome" class="empty-state" hidden>
+          <span class="empty-icon" aria-hidden="true">♫</span>
+          <p class="eyebrow">PRÊT À FAIRE DU BRUIT ?</p>
+          <h1 id="welcome-title">Créez votre premier profil</h1>
+          <p id="welcome-copy">Chaque personne dispose de son onglet et de ses propres boutons.</p>
+          <button class="button button-primary" id="welcome-profile-button" type="button">Créer un profil</button>
+        </section>
 
-      <section id="board" class="board" hidden>
-        <div class="board-heading">
-          <div>
-            <p class="eyebrow">TABLEAU DE BORD</p>
-            <h1 id="profile-title"></h1>
+        <section id="board" class="board" hidden>
+          <div class="board-heading">
+            <div>
+              <p class="eyebrow">TABLEAU DE BORD</p>
+              <h1 id="profile-title"></h1>
+            </div>
+            <button class="button button-primary" id="add-sound-button" type="button"><span aria-hidden="true">＋</span> Ajouter un son</button>
           </div>
-          <button class="button button-primary" id="add-sound-button" type="button"><span aria-hidden="true">＋</span> Ajouter un son</button>
-        </div>
-        <div id="sound-grid" class="sound-grid"></div>
-        <div id="no-sounds" class="empty-sounds" hidden>
-          <div class="empty-sound-art" aria-hidden="true"><span></span></div>
-          <h2>Ce tableau attend son premier son</h2>
-          <p>Ajoutez un fichier depuis votre appareil ou importez une URL HTTPS.</p>
-          <button class="button button-secondary" id="empty-add-sound-button" type="button">Ajouter un son</button>
-        </div>
-      </section>
-    </main>
+          <div id="sound-grid" class="sound-grid"></div>
+          <div id="no-sounds" class="empty-sounds" hidden>
+            <div class="empty-sound-art" aria-hidden="true"><span></span></div>
+            <h2>Ce tableau attend son premier son</h2>
+            <p>Ajoutez un fichier depuis votre appareil ou importez une URL HTTPS.</p>
+            <button class="button button-secondary" id="empty-add-sound-button" type="button">Ajouter un son</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="login-dialog" class="login-dialog">
+      <form id="login-form" class="dialog-card login-card">
+        <div class="login-mark brand-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p class="eyebrow">ACCÈS PRIVÉ</p>
+        <h1>Bienvenue</h1>
+        <p class="login-copy">Saisissez le mot de passe utilisateur ou administrateur pour accéder à la soundbox.</p>
+        <label>Mot de passe<input id="login-password" name="password" type="password" autocomplete="current-password" required autofocus></label>
+        <p id="login-error" class="form-error" role="alert"></p>
+        <button id="login-submit" class="button button-primary login-submit" type="submit">Se connecter</button>
+      </form>
+    </dialog>
 
     <dialog id="profile-dialog">
       <form id="profile-form" class="dialog-card">
