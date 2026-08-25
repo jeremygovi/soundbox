@@ -2,7 +2,7 @@
 
 BACKUP_FILE ?= backups/soundbox-$(shell date +%Y-%m-%d-%H%M%S).tar.gz
 
-.PHONY: help install dev test lint build up down restart logs shell deploy backup clean
+.PHONY: help install dev test lint build up down restart logs shell prod backup clean
 
 help: ## Afficher cette aide
 	@awk 'BEGIN {FS = ":.*## "; printf "Soundbox — commandes disponibles\n\n"} /^[a-zA-Z_-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -38,7 +38,7 @@ shell: ## Ouvrir un shell dans le conteneur
 	docker compose exec soundbox sh
 
 prod: ## Builder l'app et la lancer en mode daemon
-	docker compose build --no-cache && docker compose up
+	docker compose build --no-cache && docker compose up -d
 
 backup: ## Créer une archive cohérente dans backups/
 	@mkdir -p backups
