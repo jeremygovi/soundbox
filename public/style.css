@@ -313,7 +313,7 @@ input[type="file"] { color: var(--muted); }
   .sound-button { min-height: 108px; gap: 11px; padding: 11px 6px; border-radius: 13px; }
   .arcade-light { width: clamp(58px, 18vw, 72px); height: clamp(58px, 18vw, 72px); }
   .sound-name { font-size: clamp(.64rem, 2.8vw, .78rem); letter-spacing: .055em; }
-  .sound-edit { opacity: 1; font-size: .62rem; letter-spacing: -.06em; }
+  .sound-edit { opacity: 1; }
   .empty-state { padding: 70px 14px; }
   .empty-sounds { padding: 42px 16px; }
   dialog { width: 100%; max-width: none; max-height: 92dvh; margin: auto 0 0; border-right: 0; border-bottom: 0; border-left: 0; border-radius: 20px 20px 0 0; }
@@ -334,5 +334,9 @@ input[type="file"] { color: var(--muted); }
 }
 
 @media (pointer: coarse) { .sound-edit { opacity: 1; min-width: 38px; min-height: 38px; } }
+
+@media (max-width: 560px) and (pointer: coarse) {
+  .sound-edit { top: 6px; right: 6px; width: 27px; height: 27px; min-width: 27px; min-height: 27px; }
+}
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
