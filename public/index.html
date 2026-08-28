@@ -47,7 +47,13 @@
             </div>
             <button class="button button-primary" id="add-sound-button" type="button"><span aria-hidden="true">＋</span> Ajouter un son</button>
           </div>
+          <label class="sound-search" for="sound-search">
+            <span aria-hidden="true">⌕</span>
+            <span class="visually-hidden">Rechercher un son par son nom</span>
+            <input id="sound-search" type="search" autocomplete="off" placeholder="Rechercher un son…">
+          </label>
           <div id="sound-grid" class="sound-grid"></div>
+          <p id="no-search-results" class="no-search-results" role="status" hidden>Aucun son ne correspond à votre recherche.</p>
           <div id="no-sounds" class="empty-sounds" hidden>
             <div class="empty-sound-art" aria-hidden="true"><span></span></div>
             <h2>Ce tableau attend son premier son</h2>

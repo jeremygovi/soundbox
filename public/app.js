@@ -37,6 +37,8 @@ const elements = {
   board: document.querySelector('#board'),
   title: document.querySelector('#profile-title'),
   grid: document.querySelector('#sound-grid'),
+  soundSearch: document.querySelector('#sound-search'),
+  noSearchResults: document.querySelector('#no-search-results'),
   noSounds: document.querySelector('#no-sounds'),
   profileDialog: document.querySelector('#profile-dialog'),
   profileForm: document.querySelector('#profile-form'),
@@ -67,6 +69,7 @@ const state = {
   profiles: [],
   activeProfileId: null,
   sounds: [],
+  searchQuery: '',
   editingSound: null,
   source: 'url',
   audio: null,
@@ -119,6 +122,15 @@ function showToast(message) {
 }
 
 function activeProfile() { return state.profiles.find((profile) => profile.id === state.activeProfileId); }
+
+function resetSoundSearch() {
+  state.searchQuery = '';
+  elements.soundSearch.value = '';
+}
+
+function soundMatchesSearch(sound) {
+  return sound.name.toLocaleLowerCase('fr').includes(state.searchQuery.trim().toLocaleLowerCase('fr'));
+}
 
 function renderProfiles() {
   elements.tabs.replaceChildren();
@@ -195,9 +207,12 @@ function playSound(sound, button) {
 }
 
 function renderSounds() {
+  const filteredSounds = state.sounds.filter(soundMatchesSearch);
   elements.grid.replaceChildren();
   elements.noSounds.hidden = state.sounds.length !== 0;
-  for (const sound of state.sounds) {
+  elements.noSearchResults.hidden = state.sounds.length === 0 || filteredSounds.length !== 0;
+  elements.soundSearch.disabled = state.sounds.length === 0;
+  for (const sound of filteredSounds) {
     const card = document.createElement('article');
     card.className = 'sound-card';
     const button = document.createElement('button');
@@ -225,6 +240,7 @@ function renderSounds() {
 }
 
 async function selectProfile(id) {
+  if (state.activeProfileId !== id) resetSoundSearch();
   state.activeProfileId = id;
   stopAudio();
   renderProfiles();
@@ -353,6 +369,10 @@ elements.sourceSwitch.addEventListener('click', (event) => {
   const button = event.target.closest('[data-source]');
   if (button) setSource(button.dataset.source);
 });
+elements.soundSearch.addEventListener('input', () => {
+  state.searchQuery = elements.soundSearch.value;
+  renderSounds();
+});
 
 elements.loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -379,6 +399,7 @@ elements.logout.addEventListener('click', async () => {
   state.profiles = [];
   state.sounds = [];
   state.activeProfileId = null;
+  resetSoundSearch();
   showLogin();
 });
 
@@ -393,7 +414,10 @@ elements.profileForm.addEventListener('submit', async (event) => {
       body: JSON.stringify({ name: elements.profileName.value })
     });
     elements.profileDialog.close();
-    if (!editing) state.activeProfileId = profile.id;
+    if (!editing) {
+      resetSoundSearch();
+      state.activeProfileId = profile.id;
+    }
     await load();
     showToast(editing ? 'Profil renommé' : 'Profil créé');
   } catch (error) { elements.profileError.textContent = error.message; }
@@ -405,6 +429,7 @@ elements.deleteProfile.addEventListener('click', async () => {
   try {
     await api(`/api/profiles/${profile.id}`, { method: 'DELETE' });
     state.activeProfileId = null;
+    resetSoundSearch();
     elements.profileDialog.close();
     await load();
     showToast('Profil supprimé');
