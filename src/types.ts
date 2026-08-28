@@ -1,5 +1,11 @@
-export const SOUND_COLORS = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'] as const;
+export const SOUND_COLORS = [
+  'red', 'coral', 'orange', 'yellow', 'green', 'mint',
+  'cyan', 'blue', 'indigo', 'purple', 'pink', 'white'
+] as const;
 export type SoundColor = (typeof SOUND_COLORS)[number];
+
+export const SOUND_STYLES = ['arcade', 'neon', 'flat'] as const;
+export type SoundStyle = (typeof SOUND_STYLES)[number];
 
 export interface Profile {
   id: number;
@@ -17,6 +23,7 @@ export interface Sound {
   mime_type: string;
   size: number;
   color: SoundColor;
+  style: SoundStyle;
   position: number;
   created_at: string;
 }

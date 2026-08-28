@@ -66,11 +66,11 @@ describe('API', () => {
       method: 'POST',
       url: `/api/profiles/${profile.id}/sounds/upload`,
       headers: { ...auth, 'content-type': `multipart/form-data; boundary=${boundary}` },
-      payload: multipart(boundary, { name: 'Air Horn', color: 'orange' }, fakeMp3)
+      payload: multipart(boundary, { name: 'Air Horn', color: 'coral', style: 'neon' }, fakeMp3)
     });
     expect(upload.statusCode).toBe(201);
     const sound = upload.json();
-    expect(sound).toMatchObject({ name: 'Air Horn', color: 'orange', mime_type: 'audio/mpeg' });
+    expect(sound).toMatchObject({ name: 'Air Horn', color: 'coral', style: 'neon', mime_type: 'audio/mpeg' });
     expect(sound.filename).toBeUndefined();
 
     const list = await app.inject({ method: 'GET', url: `/api/profiles/${profile.id}/sounds`, headers: auth });
@@ -81,8 +81,8 @@ describe('API', () => {
     expect(audio.headers['content-type']).toBe('audio/mpeg');
     expect(audio.rawPayload).toEqual(fakeMp3);
 
-    const updated = await app.inject({ method: 'PATCH', url: `/api/sounds/${sound.id}`, headers: auth, payload: { name: 'Horn', color: 'blue' } });
-    expect(updated.json()).toMatchObject({ name: 'Horn', color: 'blue' });
+    const updated = await app.inject({ method: 'PATCH', url: `/api/sounds/${sound.id}`, headers: auth, payload: { name: 'Horn', color: 'white', style: 'flat' } });
+    expect(updated.json()).toMatchObject({ name: 'Horn', color: 'white', style: 'flat' });
 
     expect((await app.inject({ method: 'DELETE', url: `/api/sounds/${sound.id}`, headers: auth })).statusCode).toBe(204);
     expect((await app.inject({ method: 'GET', url: sound.audio_url, headers: auth })).statusCode).toBe(404);
@@ -100,6 +100,7 @@ describe('API', () => {
       payload: multipart(boundary, { name: 'Wow', color: 'pink' }, Buffer.concat([Buffer.from('ID3'), Buffer.alloc(32)]))
     });
     expect(upload.statusCode).toBe(201);
+    expect(upload.json()).toMatchObject({ style: 'arcade' });
     expect((await app.inject({ method: 'DELETE', url: `/api/profiles/${profile.id}`, headers: auth })).statusCode).toBe(204);
     const files = await readFile(path.join(directory, 'soundbox.db'));
     expect(files.length).toBeGreaterThan(0);

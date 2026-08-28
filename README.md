@@ -1,6 +1,6 @@
 # Soundbox
 
-Une soundboard web partagée et auto-hébergée. Chaque profil dispose de son onglet et de ses boutons arcade. Les sons peuvent être envoyés depuis un appareil ou copiés depuis une URL HTTPS directe.
+Une soundboard web partagée et auto-hébergée. Chaque profil dispose de son onglet et de boutons personnalisables (couleur et style). Les sons peuvent être envoyés depuis un appareil ou copiés depuis une URL HTTPS directe.
 
 ## Démarrage rapide
 

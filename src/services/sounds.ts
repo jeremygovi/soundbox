@@ -2,13 +2,14 @@ import type Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
-import type { AudioFormat, Sound, SoundColor } from '../types.js';
+import type { AudioFormat, Sound, SoundColor, SoundStyle } from '../types.js';
 
 interface NewSound {
   profileId: number;
   name: string;
   originalFilename: string | null;
   color: SoundColor;
+  style: SoundStyle;
   format: AudioFormat;
   tempPath: string;
   size: number;
@@ -31,8 +32,8 @@ export async function persistSound(db: Database.Database, soundsDir: string, inp
   await rename(input.tempPath, finalPath);
   try {
     const result = db.prepare(`
-      INSERT INTO sounds (profile_id, name, filename, original_filename, mime_type, size, color, position, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT MAX(position) + 1 FROM sounds WHERE profile_id = ?), 0), ?)
+      INSERT INTO sounds (profile_id, name, filename, original_filename, mime_type, size, color, style, position, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT MAX(position) + 1 FROM sounds WHERE profile_id = ?), 0), ?)
     `).run(
       input.profileId,
       input.name,
@@ -41,6 +42,7 @@ export async function persistSound(db: Database.Database, soundsDir: string, inp
       input.format.mimeType,
       input.size,
       input.color,
+      input.style,
       input.profileId,
       new Date().toISOString()
     );

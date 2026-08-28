@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { pipeline } from 'node:stream/promises';
 import type { Config } from '../config.js';
 import { AppError } from '../errors.js';
-import { cleanName, detectAudioFormat, isAllowedDeclaredMime, parseId, validColor } from '../services/audio.js';
+import { cleanName, detectAudioFormat, isAllowedDeclaredMime, parseId, validColor, validStyle } from '../services/audio.js';
 import { downloadAudio } from '../services/importer.js';
 import { inspectTempFile, persistSound, soundFilePath } from '../services/sounds.js';
 import type { Sound } from '../types.js';
@@ -21,6 +21,7 @@ function soundResponse(sound: Sound): Omit<Sound, 'filename'> & { audio_url: str
     mime_type: sound.mime_type,
     size: sound.size,
     color: sound.color,
+    style: sound.style,
     position: sound.position,
     created_at: sound.created_at,
     audio_url: `/api/sounds/${sound.id}/audio`
@@ -66,12 +67,15 @@ export function registerSoundRoutes(app: FastifyInstance, db: Database.Database,
       if (!format) throw new AppError("Le fichier n'est pas un MP3, WAV ou OGG valide");
       const name = cleanName(fields.name ?? originalFilename?.replace(/\.[^.]+$/, ''));
       const color = fields.color ?? 'red';
+      const style = fields.style ?? 'arcade';
       if (!validColor(color)) throw new AppError('Couleur invalide');
+      if (!validStyle(style)) throw new AppError('Style invalide');
       const sound = await persistSound(db, config.soundsDir, {
         profileId,
         name,
         originalFilename,
         color,
+        style,
         format,
         tempPath,
         size
@@ -85,12 +89,14 @@ export function registerSoundRoutes(app: FastifyInstance, db: Database.Database,
 
   app.post<{
     Params: { id: string };
-    Body: { name?: unknown; url?: unknown; color?: unknown };
+    Body: { name?: unknown; url?: unknown; color?: unknown; style?: unknown };
   }>('/api/profiles/:id/sounds/import', async (request, reply) => {
     const profileId = parseId(request.params.id);
     const name = cleanName(request.body?.name);
     const color = request.body?.color ?? 'red';
+    const style = request.body?.style ?? 'arcade';
     if (!validColor(color)) throw new AppError('Couleur invalide');
+    if (!validStyle(style)) throw new AppError('Style invalide');
     if (!db.prepare('SELECT id FROM profiles WHERE id = ?').get(profileId)) throw new AppError('Profil introuvable', 404);
     const downloaded = await downloadAudio(
       request.body?.url,
@@ -106,6 +112,7 @@ export function registerSoundRoutes(app: FastifyInstance, db: Database.Database,
         name,
         originalFilename: downloaded.originalFilename,
         color,
+        style,
         format: downloaded.format,
         tempPath,
         size: downloaded.data.length
@@ -119,17 +126,19 @@ export function registerSoundRoutes(app: FastifyInstance, db: Database.Database,
 
   app.patch<{
     Params: { id: string };
-    Body: { name?: unknown; color?: unknown; position?: unknown };
+    Body: { name?: unknown; color?: unknown; style?: unknown; position?: unknown };
   }>('/api/sounds/:id', async (request) => {
     const id = parseId(request.params.id);
     const current = db.prepare('SELECT * FROM sounds WHERE id = ?').get(id) as Sound | undefined;
     if (!current) throw new AppError('Son introuvable', 404);
     const name = request.body?.name === undefined ? current.name : cleanName(request.body.name);
     const color = request.body?.color === undefined ? current.color : request.body.color;
+    const style = request.body?.style === undefined ? current.style : request.body.style;
     const position = request.body?.position === undefined ? current.position : Number(request.body.position);
     if (!validColor(color)) throw new AppError('Couleur invalide');
+    if (!validStyle(style)) throw new AppError('Style invalide');
     if (!Number.isSafeInteger(position) || position < 0) throw new AppError('Position invalide');
-    db.prepare('UPDATE sounds SET name = ?, color = ?, position = ? WHERE id = ?').run(name, color, position, id);
+    db.prepare('UPDATE sounds SET name = ?, color = ?, style = ?, position = ? WHERE id = ?').run(name, color, style, position, id);
     return soundResponse(db.prepare('SELECT * FROM sounds WHERE id = ?').get(id) as Sound);
   });
 

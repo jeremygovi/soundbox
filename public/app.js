@@ -1,4 +1,23 @@
-const COLORS = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'];
+const COLORS = [
+  { value: 'red', label: 'Rouge' },
+  { value: 'coral', label: 'Corail' },
+  { value: 'orange', label: 'Orange' },
+  { value: 'yellow', label: 'Jaune' },
+  { value: 'green', label: 'Vert' },
+  { value: 'mint', label: 'Menthe' },
+  { value: 'cyan', label: 'Cyan' },
+  { value: 'blue', label: 'Bleu' },
+  { value: 'indigo', label: 'Indigo' },
+  { value: 'purple', label: 'Violet' },
+  { value: 'pink', label: 'Rose' },
+  { value: 'white', label: 'Blanc' }
+];
+
+const STYLES = [
+  { value: 'arcade', label: 'Arcade', description: 'Relief classique' },
+  { value: 'neon', label: 'Néon', description: 'Anneau lumineux' },
+  { value: 'flat', label: 'Plat', description: 'Simple et moderne' }
+];
 
 const elements = {
   appShell: document.querySelector('#app-shell'),
@@ -33,6 +52,7 @@ const elements = {
   urlField: document.querySelector('#url-field'),
   sourceSwitch: document.querySelector('#source-switch'),
   colorOptions: document.querySelector('#color-options'),
+  styleOptions: document.querySelector('#style-options'),
   soundError: document.querySelector('#sound-error'),
   soundSubmit: document.querySelector('#sound-submit-button'),
   deleteSound: document.querySelector('#delete-sound-button'),
@@ -45,7 +65,7 @@ const state = {
   activeProfileId: null,
   sounds: [],
   editingSound: null,
-  source: 'file',
+  source: 'url',
   audio: null,
   audioSoundId: null,
   audioButton: null,
@@ -179,7 +199,7 @@ function renderSounds() {
     card.className = 'sound-card';
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = `sound-button color-${sound.color}`;
+    button.className = `sound-button color-${sound.color} style-${sound.style || 'arcade'}`;
     button.setAttribute('aria-label', `Jouer ${sound.name}`);
     const light = document.createElement('span');
     light.className = 'arcade-light';
@@ -233,6 +253,7 @@ function setSource(source) {
 }
 
 function selectedColor() { return elements.colorOptions.querySelector('input:checked')?.value || 'red'; }
+function selectedStyle() { return elements.styleOptions.querySelector('input:checked')?.value || 'arcade'; }
 
 function openSoundDialog(sound = null) {
   state.editingSound = sound;
@@ -248,12 +269,16 @@ function openSoundDialog(sound = null) {
     elements.soundName.value = sound.name;
     const input = elements.colorOptions.querySelector(`input[value="${sound.color}"]`);
     if (input) input.checked = true;
+    const styleInput = elements.styleOptions.querySelector(`input[value="${sound.style || 'arcade'}"]`);
+    if (styleInput) styleInput.checked = true;
     elements.soundFile.required = false;
     elements.soundUrl.required = false;
   } else {
-    setSource('file');
+    setSource('url');
     const red = elements.colorOptions.querySelector('input[value="red"]');
     if (red) red.checked = true;
+    const arcade = elements.styleOptions.querySelector('input[value="arcade"]');
+    if (arcade) arcade.checked = true;
   }
   elements.soundDialog.showModal();
   elements.soundName.focus();
@@ -282,14 +307,36 @@ async function initialize() {
 COLORS.forEach((color, index) => {
   const label = document.createElement('label');
   label.className = 'color-choice';
-  label.title = color;
-  label.setAttribute('aria-label', color);
+  label.title = color.label;
+  label.setAttribute('aria-label', color.label);
   const input = document.createElement('input');
-  input.type = 'radio'; input.name = 'color'; input.value = color; input.checked = index === 0;
+  input.type = 'radio'; input.name = 'color'; input.value = color.value; input.checked = index === 0;
   const swatch = document.createElement('span');
-  swatch.className = `color-swatch color-${color}`;
+  swatch.className = `color-swatch color-${color.value}`;
   label.append(input, swatch);
   elements.colorOptions.append(label);
+});
+
+STYLES.forEach((style, index) => {
+  const label = document.createElement('label');
+  label.className = 'style-choice';
+  const input = document.createElement('input');
+  input.type = 'radio'; input.name = 'style'; input.value = style.value; input.checked = index === 0;
+  const preview = document.createElement('span');
+  preview.className = `style-preview style-${style.value}`;
+  const light = document.createElement('span');
+  light.className = 'arcade-light';
+  light.setAttribute('aria-hidden', 'true');
+  const copy = document.createElement('span');
+  copy.className = 'style-copy';
+  const name = document.createElement('strong');
+  name.textContent = style.label;
+  const description = document.createElement('small');
+  description.textContent = style.description;
+  copy.append(name, description);
+  preview.append(light, copy);
+  label.append(input, preview);
+  elements.styleOptions.append(label);
 });
 
 document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
@@ -370,19 +417,20 @@ elements.soundForm.addEventListener('submit', async (event) => {
       await api(`/api/sounds/${state.editingSound.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: elements.soundName.value, color: selectedColor() })
+        body: JSON.stringify({ name: elements.soundName.value, color: selectedColor(), style: selectedStyle() })
       });
     } else if (state.source === 'file') {
       const data = new FormData();
       data.append('name', elements.soundName.value);
       data.append('color', selectedColor());
+      data.append('style', selectedStyle());
       data.append('file', elements.soundFile.files[0]);
       await api(`/api/profiles/${state.activeProfileId}/sounds/upload`, { method: 'POST', body: data });
     } else {
       await api(`/api/profiles/${state.activeProfileId}/sounds/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: elements.soundName.value, color: selectedColor(), url: elements.soundUrl.value })
+        body: JSON.stringify({ name: elements.soundName.value, color: selectedColor(), style: selectedStyle(), url: elements.soundUrl.value })
       });
     }
     elements.soundDialog.close();

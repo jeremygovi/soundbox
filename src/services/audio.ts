@@ -1,4 +1,4 @@
-import { SOUND_COLORS, type AudioFormat, type SoundColor } from '../types.js';
+import { SOUND_COLORS, SOUND_STYLES, type AudioFormat, type SoundColor, type SoundStyle } from '../types.js';
 
 const ALLOWED_MIME_TYPES = new Set([
   'audio/mpeg',
@@ -31,6 +31,10 @@ export function detectAudioFormat(bytes: Uint8Array): AudioFormat | null {
 
 export function validColor(value: unknown): value is SoundColor {
   return typeof value === 'string' && (SOUND_COLORS as readonly string[]).includes(value);
+}
+
+export function validStyle(value: unknown): value is SoundStyle {
+  return typeof value === 'string' && (SOUND_STYLES as readonly string[]).includes(value);
 }
 
 export function cleanName(value: unknown, field = 'name'): string {

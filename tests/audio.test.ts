@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectAudioFormat, validColor } from '../src/services/audio.js';
+import { detectAudioFormat, validColor, validStyle } from '../src/services/audio.js';
 import { isPublicIp, validateHttpsUrl } from '../src/services/importer.js';
 
 describe('validation audio', () => {
@@ -12,8 +12,14 @@ describe('validation audio', () => {
   });
 
   it('limite les couleurs à la palette', () => {
-    expect(validColor('cyan')).toBe(true);
+    expect(validColor('mint')).toBe(true);
     expect(validColor('#ffffff')).toBe(false);
+  });
+
+  it('limite les styles aux variantes proposées', () => {
+    expect(validStyle('arcade')).toBe(true);
+    expect(validStyle('neon')).toBe(true);
+    expect(validStyle('glass')).toBe(false);
   });
 });
 

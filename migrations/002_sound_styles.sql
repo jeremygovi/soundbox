@@ -1,0 +1,1 @@
+ALTER TABLE sounds ADD COLUMN style TEXT NOT NULL DEFAULT 'arcade';

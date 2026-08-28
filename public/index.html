@@ -95,17 +95,21 @@
         </div>
 
         <div id="source-switch" class="segmented" role="group" aria-label="Source du son">
-          <button type="button" data-source="file" class="active">Fichier local</button>
-          <button type="button" data-source="url">URL HTTPS</button>
+          <button type="button" data-source="file">Fichier local</button>
+          <button type="button" data-source="url" class="active">URL</button>
         </div>
 
         <label>Nom du bouton<input id="sound-name" name="name" maxlength="80" autocomplete="off" required placeholder="Air horn"></label>
-        <label id="file-field">Fichier audio<input id="sound-file" name="file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,.mp3,.wav,.ogg"></label>
-        <label id="url-field" hidden>URL directe<input id="sound-url" name="url" type="url" inputmode="url" placeholder="https://exemple.com/son.mp3"></label>
+        <label id="file-field" hidden>Fichier audio<input id="sound-file" name="file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,.mp3,.wav,.ogg"></label>
+        <label id="url-field">URL directe<input id="sound-url" name="url" type="url" inputmode="url" placeholder="https://exemple.com/son.mp3"></label>
 
         <fieldset class="color-fieldset">
           <legend>Couleur</legend>
           <div id="color-options" class="color-options"></div>
+        </fieldset>
+        <fieldset class="style-fieldset">
+          <legend>Style du bouton</legend>
+          <div id="style-options" class="style-options"></div>
         </fieldset>
         <p id="sound-error" class="form-error" role="alert"></p>
         <div class="dialog-actions">
