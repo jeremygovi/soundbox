@@ -4,7 +4,7 @@ export const SOUND_COLORS = [
 ] as const;
 export type SoundColor = (typeof SOUND_COLORS)[number];
 
-export const SOUND_STYLES = ['arcade', 'neon', 'flat'] as const;
+export const SOUND_STYLES = ['arcade', 'neon', 'flat', 'vinyl', 'wave', 'glass'] as const;
 export type SoundStyle = (typeof SOUND_STYLES)[number];
 
 export interface Profile {

@@ -16,7 +16,10 @@ const COLORS = [
 const STYLES = [
   { value: 'arcade', label: 'Arcade', description: 'Relief classique' },
   { value: 'neon', label: 'Néon', description: 'Anneau lumineux' },
-  { value: 'flat', label: 'Plat', description: 'Simple et moderne' }
+  { value: 'flat', label: 'Plat', description: 'Simple et moderne' },
+  { value: 'vinyl', label: 'Vinyle', description: 'Musical et tactile' },
+  { value: 'wave', label: 'Onde', description: 'Numérique et dynamique' },
+  { value: 'glass', label: 'Verre', description: 'Doux et premium' }
 ];
 
 const elements = {

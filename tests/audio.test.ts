@@ -19,7 +19,10 @@ describe('validation audio', () => {
   it('limite les styles aux variantes proposées', () => {
     expect(validStyle('arcade')).toBe(true);
     expect(validStyle('neon')).toBe(true);
-    expect(validStyle('glass')).toBe(false);
+    expect(validStyle('vinyl')).toBe(true);
+    expect(validStyle('wave')).toBe(true);
+    expect(validStyle('glass')).toBe(true);
+    expect(validStyle('chrome')).toBe(false);
   });
 });
 
